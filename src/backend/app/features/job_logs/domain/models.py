@@ -37,4 +37,6 @@ class JobLog(Base):
     )
 
     # リレーション
-    article: Mapped["Article"] = relationship(back_populates="job_logs")
+    article: Mapped["Article"] = relationship(
+        "Article", back_populates="job_logs"
+    )

@@ -42,5 +42,9 @@ class PromptTemplate(Base):
     )
 
     # リレーション
-    category: Mapped["Category"] = relationship(back_populates="prompt_templates")
-    articles: Mapped[list["Article"]] = relationship(back_populates="prompt_template")
+    category: Mapped["Category"] = relationship(
+        "Category", back_populates="prompt_templates"
+    )
+    articles: Mapped[list["Article"]] = relationship(
+        "Article", back_populates="prompt_template"
+    )

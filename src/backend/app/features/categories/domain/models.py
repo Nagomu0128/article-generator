@@ -39,6 +39,8 @@ class Category(Base):
 
     # リレーション
     prompt_templates: Mapped[list["PromptTemplate"]] = relationship(
-        back_populates="category", cascade="all, delete-orphan"
+        "PromptTemplate", back_populates="category", cascade="all, delete-orphan"
     )
-    articles: Mapped[list["Article"]] = relationship(back_populates="category")
+    articles: Mapped[list["Article"]] = relationship(
+        "Article", back_populates="category"
+    )

@@ -137,7 +137,7 @@ article-generator/
 - [x] **Task 00**: 事前準備（API キー取得）
 - [x] **Task 01**: プロジェクト初期化
 - [x] **Task 02**: データベース設計
-- [ ] **Task 03**: FastAPI基本構造
+- [x] **Task 03**: FastAPI基本構造（CRUD API）
 - [ ] **Task 04**: Google Sheets連携
 - [ ] **Task 05**: WordPress連携
 - [ ] **Task 06**: Claude API連携

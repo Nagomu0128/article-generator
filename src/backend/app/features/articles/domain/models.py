@@ -55,10 +55,12 @@ class Article(Base):
     )
 
     # リレーション
-    category: Mapped["Category"] = relationship(back_populates="articles")
+    category: Mapped["Category"] = relationship(
+        "Category", back_populates="articles"
+    )
     prompt_template: Mapped[Optional["PromptTemplate"]] = relationship(
-        back_populates="articles"
+        "PromptTemplate", back_populates="articles"
     )
     job_logs: Mapped[list["JobLog"]] = relationship(
-        back_populates="article", cascade="all, delete-orphan"
+        "JobLog", back_populates="article", cascade="all, delete-orphan"
     )
