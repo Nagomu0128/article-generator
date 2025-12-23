@@ -3,7 +3,7 @@ name: article_generator
 version: "3.9"
 
 services:
-  db:
+  app_db:
     image: postgres:15-alpine
     environment:
       POSTGRES_USER: postgres
@@ -29,8 +29,9 @@ services:
       timeout: 5s
       retries: 5
 
-  backend:
-    build: ./backend
+  backend_app:
+    build: ./docker/backend/Dockerfile
+    image: backend_app
     ports:
       - "8000:8000"
     environment:
@@ -41,7 +42,7 @@ services:
     volumes:
       - ./backend:/app
     depends_on:
-      db:
+      app_db:
         condition: service_healthy
       redis:
         condition: service_healthy
