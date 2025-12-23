@@ -30,17 +30,19 @@ services:
       retries: 5
 
   backend_app:
-    build: ./docker/backend/Dockerfile
-    image: backend_app
+    build:
+      context: ./src/backend
+      dockerfile: ../../docker/backend/Dockerfile
+    image: article_generator_backend
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/article_generator
-      - REDIS_URL=redis://redis:6379
+      DATABASE_URL: postgresql://postgres:postgres@app_db:5432/article_generator
+      REDIS_URL: redis://redis:6379
     env_file:
-      - .env
+      - .env.local
     volumes:
-      - ./backend:/app
+      - ./src/backend:/app
     depends_on:
       app_db:
         condition: service_healthy
