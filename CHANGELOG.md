@@ -7,6 +7,37 @@
 
 ## [Unreleased]
 
+### Task 09 完了 - 2025-12-24
+
+#### 追加
+- Next.jsフロントエンド（App Router）
+  - `lib/api.ts` - APIクライアント（axios）
+  - `types/index.ts` - TypeScript型定義
+  - `components/providers/query-provider.tsx` - React Query設定
+  - `components/layout/sidebar.tsx` - サイドバーナビゲーション
+  - `components/layout/header.tsx` - ヘッダーコンポーネント
+  - `app/page.tsx` - ダッシュボード画面
+  - `app/categories/page.tsx` - カテゴリ一覧画面
+  - `app/articles/page.tsx` - 記事一覧画面
+- UI機能
+  - 統計カード（総記事数、レビュー待ち、公開済み、カテゴリ数）
+  - ステータス別記事数の可視化
+  - 記事のチェックボックス選択
+  - バッチ生成機能（選択した複数記事の一括生成）
+  - ステータスバッジ（色分け表示）
+  - レスポンシブデザイン
+
+#### 変更
+- app/layout.tsx: QueryProvider、Sidebar、Header統合
+- package.json: axios、@tanstack/react-query、lucide-react追加（既存）
+
+#### 統合
+- バックエンドAPIとの完全統合
+- React Query による自動キャッシュとリフェッチ
+- shadcn/ui コンポーネントライブラリ
+
+---
+
 ### Task 08 完了 - 2025-12-24
 
 #### 追加
