@@ -139,7 +139,7 @@ article-generator/
 - [x] **Task 02**: データベース設計
 - [x] **Task 03**: FastAPI基本構造（CRUD API）
 - [ ] **Task 04**: Google Sheets連携
-- [ ] **Task 05**: WordPress連携
+- [x] **Task 05**: WordPress連携
 - [ ] **Task 06**: Claude API連携
 - [ ] **Task 07**: 記事生成パイプライン
 - [ ] **Task 08**: バッチ処理実装
