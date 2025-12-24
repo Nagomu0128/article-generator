@@ -7,6 +7,32 @@
 
 ## [Unreleased]
 
+### Task 08 完了 - 2025-12-24
+
+#### 追加
+- ARQワーカーシステム（`app/workers/tasks.py`）
+  - `generate_article_task` - 単一記事の非同期生成タスク
+  - `batch_generate_task` - バッチ記事生成タスク
+  - `WorkerSettings` - ARQワーカー設定
+  - `get_redis_pool` - Redis接続プールヘルパー
+- バッチ処理API（`features/batch/`）
+  - `POST /api/batch/generate` - バッチ生成エンドポイント（最大100件）
+  - `GET /api/batch/status/{job_id}` - ジョブステータス監視
+  - `POST /api/batch/generate/single/{article_id}` - 単一記事の非同期生成
+- バッチ処理スキーマ（`BatchGenerateRequest`, `BatchResponse`, `JobStatusResponse`）
+- Docker Composeワーカーサービス
+
+#### 変更
+- docker-compose.yml: ARQワーカーサービス追加
+- main.py: バッチAPIルーター追加
+- README.md: Task 08完了マーク、バッチAPIエンドポイント追加
+
+#### 統合
+- Task 07 (記事生成パイプライン) との統合
+- Redis + ARQによる非同期ジョブキュー
+
+---
+
 ### Task 07 完了 - 2025-12-24
 
 #### 追加

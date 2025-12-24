@@ -47,9 +47,15 @@ Claude API、WordPress、Google Sheetsを統合した自動記事生成・管理
 - ✅ **ジョブログ**: 生成履歴の記録と追跡
 - ✅ **エラーハンドリング**: リトライ処理、詳細なエラーログ
 
-### Task 08-10: 実装予定
+### Task 08: バッチ処理 ✅
 
-- ⏳ **バッチ処理**: 複数記事の一括生成
+- ✅ **ARQワーカー**: バックグラウンドジョブ処理
+- ✅ **バッチ生成**: 複数記事の非同期一括生成（最大100件）
+- ✅ **ジョブ管理**: ジョブステータス監視、進捗確認
+- ✅ **単一記事の非同期生成**: レスポンス待機不要の生成キュー
+
+### Task 09-10: 実装予定
+
 - ⏳ **フロントエンド**: ダッシュボード、記事管理UI
 - ⏳ **デプロイ**: 本番環境設定、CI/CD
 
@@ -196,8 +202,13 @@ curl -X POST http://localhost:8000/api/wordpress/publish \
 - `DELETE /api/articles/{id}` - 記事削除
 
 #### 記事生成
-- `POST /api/generate` - 記事生成
-- `POST /api/generate/regenerate/{id}` - 記事再生成
+- `POST /api/generate` - 記事生成（同期）
+- `POST /api/generate/regenerate/{id}` - 記事再生成（同期）
+
+#### バッチ処理
+- `POST /api/batch/generate` - バッチ記事生成（非同期）
+- `GET /api/batch/status/{job_id}` - ジョブステータス確認
+- `POST /api/batch/generate/single/{id}` - 単一記事の非同期生成
 
 #### Google Sheets連携
 - `POST /api/sheets/create` - スプレッドシート作成
@@ -246,7 +257,7 @@ article-generator/
 - [x] **Task 05**: WordPress連携
 - [x] **Task 06**: Claude API連携
 - [x] **Task 07**: 記事生成パイプライン
-- [ ] **Task 08**: バッチ処理実装
+- [x] **Task 08**: バッチ処理実装
 - [ ] **Task 09**: フロントエンド実装
 - [ ] **Task 10**: 結合テスト・デプロイ
 
