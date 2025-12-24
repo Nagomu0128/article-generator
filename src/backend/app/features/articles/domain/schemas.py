@@ -53,3 +53,24 @@ class ArticleListResponse(BaseModel):
     total: int
     page: int
     per_page: int
+
+
+# 記事生成APIスキーマ
+
+
+class GenerateRequest(BaseModel):
+    """記事生成リクエスト"""
+
+    article_id: UUID
+    options: Optional[dict] = None
+
+
+class GenerateResponse(BaseModel):
+    """記事生成レスポンス"""
+
+    success: bool
+    article_id: UUID
+    title: Optional[str]
+    char_count: int
+    errors: list[str]
+    duration_ms: int

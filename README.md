@@ -13,19 +13,45 @@ Claude API、WordPress、Google Sheetsを統合した自動記事生成・管理
 - **Database**: PostgreSQL 15 + SQLAlchemy (async)
 - **Cache/Queue**: Redis + ARQ
 - **External APIs**:
-  - Anthropic Claude API
-  - WordPress REST API
-  - Google Sheets API
+  - Anthropic Claude API (記事生成)
+  - WordPress REST API (記事投稿)
+  - Google Sheets API (進捗管理)
 
 ### フロントエンド
 - **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript
 - **State Management**: React Query + Zustand
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS + shadcn/ui
 
 ### インフラ
 - **開発環境**: Docker Compose
 - **本番環境**: Railway (Backend) + Vercel (Frontend)
+
+## ✨ 実装済み機能
+
+### Task 00-07: コア機能 ✅
+
+- ✅ **カテゴリ管理**: カテゴリのCRUD操作
+- ✅ **記事管理**: 記事のCRUD操作、ステータス管理
+- ✅ **記事生成**: Claude APIによる自動記事生成
+  - プロンプトテンプレートのカスタマイズ
+  - 生成パラメータの調整（文字数、temperature等）
+  - レスポンスの自動検証
+- ✅ **Google Sheets連携**:
+  - スプレッドシート自動作成
+  - 記事ステータスの自動同期
+- ✅ **WordPress連携**:
+  - 下書き作成
+  - 記事公開
+  - Markdown → HTML変換
+- ✅ **ジョブログ**: 生成履歴の記録と追跡
+- ✅ **エラーハンドリング**: リトライ処理、詳細なエラーログ
+
+### Task 08-10: 実装予定
+
+- ⏳ **バッチ処理**: 複数記事の一括生成
+- ⏳ **フロントエンド**: ダッシュボード、記事管理UI
+- ⏳ **デプロイ**: 本番環境設定、CI/CD
 
 ## 🚀 セットアップ
 
@@ -43,18 +69,18 @@ Claude API、WordPress、Google Sheetsを統合した自動記事生成・管理
 cp .env.example .env.local
 ```
 
-以下の環境変数を設定:
+以下の環境変数を設定（**重要**: 実際のAPIキーが必要です）:
 
 ```env
-# Anthropic (Claude API)
-ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
+# Anthropic (Claude API) ⚠️ 必須
+ANTHROPIC_API_KEY=sk-ant-api03-your-actual-key-here
 
-# WordPress
+# WordPress ⚠️ 必須（記事投稿を使う場合）
 WORDPRESS_URL=https://your-site.com
 WORDPRESS_USERNAME=admin
 WORDPRESS_APP_PASSWORD=xxxx xxxx xxxx xxxx
 
-# Google Sheets
+# Google Sheets ⚠️ 必須（Sheets連携を使う場合）
 GOOGLE_CREDENTIALS_JSON={"type":"service_account",...}
 
 # Database & Redis (開発環境ではデフォルトのまま)
@@ -67,6 +93,12 @@ DEBUG=true
 SECRET_KEY=your-random-secret-key-at-least-32-chars
 FRONTEND_URL=http://localhost:3000
 ```
+
+**⚠️ 重要な注意事項:**
+- `ANTHROPIC_API_KEY`: [Anthropic Console](https://console.anthropic.com/) で取得
+- `WORDPRESS_APP_PASSWORD`: WordPressの「アプリケーションパスワード」で生成
+- `GOOGLE_CREDENTIALS_JSON`: Google Cloud Console でサービスアカウントを作成し、JSON形式で取得
+- APIキーが設定されていないと記事生成は失敗します
 
 ### 2. Docker環境の起動
 
@@ -104,6 +136,78 @@ curl -I http://localhost:3000
 # => HTTP/1.1 200 OK
 ```
 
+## 🚀 使い方
+
+### 記事生成の基本フロー
+
+```bash
+# 1. カテゴリを作成
+curl -X POST http://localhost:8000/api/categories \
+  -H "Content-Type: application/json" \
+  -d '{"name":"AI開発","slug":"ai-dev"}'
+# => {"id":"<CATEGORY_ID>",...}
+
+# 2. 記事を作成
+curl -X POST http://localhost:8000/api/articles \
+  -H "Content-Type: application/json" \
+  -d '{"category_id":"<CATEGORY_ID>","keyword":"Claude API入門"}'
+# => {"id":"<ARTICLE_ID>","status":"pending",...}
+
+# 3. 記事を生成（Claude APIが記事を自動生成）
+curl -X POST http://localhost:8000/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "article_id":"<ARTICLE_ID>",
+    "options":{
+      "char_count_min":2000,
+      "char_count_max":4000,
+      "temperature":0.7
+    }
+  }'
+# => {"success":true,"title":"Claude API入門ガイド","char_count":3245,...}
+
+# 4. WordPress下書き作成
+curl -X POST http://localhost:8000/api/wordpress/draft \
+  -H "Content-Type: application/json" \
+  -d '{"article_id":"<ARTICLE_ID>"}'
+# => {"wp_post_id":123,"wp_url":"https://...",...}
+
+# 5. WordPress公開
+curl -X POST http://localhost:8000/api/wordpress/publish \
+  -H "Content-Type: application/json" \
+  -d '{"article_id":"<ARTICLE_ID>"}'
+# => {"status":"publish",...}
+```
+
+### 主要APIエンドポイント
+
+#### カテゴリ管理
+- `GET /api/categories` - カテゴリ一覧
+- `POST /api/categories` - カテゴリ作成
+- `GET /api/categories/{id}` - カテゴリ取得
+- `PATCH /api/categories/{id}` - カテゴリ更新
+- `DELETE /api/categories/{id}` - カテゴリ削除
+
+#### 記事管理
+- `GET /api/articles` - 記事一覧（ページネーション、フィルタ対応）
+- `POST /api/articles` - 記事作成
+- `GET /api/articles/{id}` - 記事取得
+- `PATCH /api/articles/{id}` - 記事更新
+- `DELETE /api/articles/{id}` - 記事削除
+
+#### 記事生成
+- `POST /api/generate` - 記事生成
+- `POST /api/generate/regenerate/{id}` - 記事再生成
+
+#### Google Sheets連携
+- `POST /api/sheets/create` - スプレッドシート作成
+
+#### WordPress連携
+- `POST /api/wordpress/draft` - 下書き作成
+- `POST /api/wordpress/publish` - 記事公開
+
+詳細なAPIドキュメントは http://localhost:8000/docs で確認できます。
+
 ## 📂 ディレクトリ構造
 
 ```
@@ -138,10 +242,10 @@ article-generator/
 - [x] **Task 01**: プロジェクト初期化
 - [x] **Task 02**: データベース設計
 - [x] **Task 03**: FastAPI基本構造（CRUD API）
-- [ ] **Task 04**: Google Sheets連携
+- [x] **Task 04**: Google Sheets連携
 - [x] **Task 05**: WordPress連携
-- [ ] **Task 06**: Claude API連携
-- [ ] **Task 07**: 記事生成パイプライン
+- [x] **Task 06**: Claude API連携
+- [x] **Task 07**: 記事生成パイプライン
 - [ ] **Task 08**: バッチ処理実装
 - [ ] **Task 09**: フロントエンド実装
 - [ ] **Task 10**: 結合テスト・デプロイ
