@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     secret_key: str = Field(...)
     database_url: PostgresDsn = Field(...)
     redis_url: RedisDsn = Field(...)
-    anthropic_api_key: str = Field(...)
+    google_api_key: str = Field(...)
     wordpress_url: str = Field(...)
     wordpress_username: str = Field(...)
     wordpress_app_password: str = Field(...)

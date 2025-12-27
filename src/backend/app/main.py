@@ -10,7 +10,11 @@ from app.core.config import get_settings
 from app.shared.domain import models  # noqa
 
 from app.features.articles.presentation.routes import router as articles_router
+from app.features.articles.presentation.generate_routes import router as generate_router
+from app.features.batch.presentation.routes import router as batch_router
 from app.features.categories.presentation.routes import router as categories_router
+from app.features.sheets.presentation.routes import router as sheets_router
+from app.features.wordpress.presentation.routes import router as wordpress_router
 
 settings = get_settings()
 
@@ -45,3 +49,7 @@ async def health_check():
 # APIルーター登録
 app.include_router(categories_router, prefix="/api")
 app.include_router(articles_router, prefix="/api")
+app.include_router(generate_router, prefix="/api")
+app.include_router(batch_router, prefix="/api")
+app.include_router(sheets_router, prefix="/api")
+app.include_router(wordpress_router, prefix="/api")

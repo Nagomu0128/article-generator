@@ -5,6 +5,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Query, status
 
+from sqlalchemy import select
+
 from app.features.articles.domain.models import Article
 from app.features.articles.domain.schemas import (
     ArticleCreate,
@@ -13,7 +15,9 @@ from app.features.articles.domain.schemas import (
     ArticleUpdate,
 )
 from app.features.articles.infrastructure.repository import ArticleRepository
+from app.features.categories.domain.models import Category
 from app.features.categories.infrastructure.repository import CategoryRepository
+from app.features.sheets.infrastructure.google_sheets_service import sheets_service
 from app.shared.domain.enums import ArticleStatus
 from app.shared.domain.exceptions import NotFoundError, ValidationError
 from app.shared.infrastructure.dependencies import DbSession, Pagination
@@ -85,6 +89,10 @@ async def update_article(article_id: UUID, data: ArticleUpdate, db: DbSession):
         setattr(article, field, value)
 
     updated = await repo.update(article)
+
+    # Google Sheetsに同期
+    await _sync_to_sheets(db, updated)
+
     return updated
 
 
@@ -96,3 +104,34 @@ async def delete_article(article_id: UUID, db: DbSession):
     if not article:
         raise NotFoundError("Article", str(article_id))
     await repo.delete(article)
+
+
+async def _sync_to_sheets(db: DbSession, article: Article) -> None:
+    """Google Sheetsに記事ステータスを同期
+
+    Args:
+        db: データベースセッション
+        article: 同期する記事
+
+    Note:
+        エラーは無視して処理を継続
+    """
+    try:
+        # カテゴリを取得してsheet_idを確認
+        result = await db.execute(
+            select(Category).where(Category.id == article.category_id)
+        )
+        category = result.scalar_one_or_none()
+
+        if category and category.sheet_id:
+            sheets_service.update_article_status(
+                category.sheet_id,
+                article.keyword,
+                article.status,
+                article.title,
+                article.wp_url,
+                article.wp_post_id
+            )
+    except Exception:
+        # Sheetsのエラーは無視して処理を継続
+        pass

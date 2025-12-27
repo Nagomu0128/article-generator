@@ -39,7 +39,7 @@ services:
       REDIS_URL: redis://redis:6379
     env_file:
       - .env.example
-      - .env.local
+      - .env
     volumes:
       - ./src/backend:/app
     depends_on:
@@ -48,6 +48,26 @@ services:
       redis:
         condition: service_healthy
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  worker:
+    build:
+      context: ./src/backend
+      dockerfile: ../../docker/backend/Dockerfile
+    image: article_generator_backend
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@app_db:5432/article_generator
+      REDIS_URL: redis://redis:6379
+    env_file:
+      - .env.example
+      - .env
+    volumes:
+      - ./src/backend:/app
+    depends_on:
+      app_db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: arq app.workers.tasks.WorkerSettings
 
 volumes:
   postgres_data:
