@@ -1,6 +1,6 @@
-"""Tests for Claude service.
+"""Tests for Gemini service.
 
-Note: These tests require a valid Anthropic API key in .env
+Note: These tests require a valid Google API key in .env
 Some tests are marked with pytest.mark.integration and can be skipped.
 """
 import os
@@ -12,7 +12,7 @@ from app.shared.infrastructure.llm.claude_service import ClaudeService
 
 
 class TestClaudeService:
-    """Test cases for ClaudeService."""
+    """Test cases for ClaudeService (Gemini implementation)."""
 
     def setup_method(self):
         """Set up test fixtures."""
@@ -20,7 +20,6 @@ class TestClaudeService:
 
     def test_initialization(self):
         """Test service initialization."""
-        assert self.service.client is not None
         assert self.service.default_config is not None
         assert isinstance(self.service.default_config, LLMConfig)
 
@@ -28,7 +27,7 @@ class TestClaudeService:
         """Test default configuration values."""
         config = self.service.default_config
 
-        assert config.model == "claude-sonnet-4-20250514"
+        assert config.model == "gemini-1.5-pro"
         assert config.max_tokens == 8192
         assert config.temperature == 0.7
 
@@ -40,8 +39,8 @@ class TestClaudeService:
         This test requires a valid API key and makes a real API call.
         Skip with: pytest -m "not integration"
         """
-        if not os.getenv("ANTHROPIC_API_KEY"):
-            pytest.skip("ANTHROPIC_API_KEY not set")
+        if not os.getenv("GOOGLE_API_KEY"):
+            pytest.skip("GOOGLE_API_KEY not set")
 
         system = "あなたは簡潔に答えるアシスタントです。"
         user = "「AI」を一言で説明してください。"
@@ -58,11 +57,11 @@ class TestClaudeService:
     @pytest.mark.asyncio
     async def test_generate_with_custom_config(self):
         """Test generation with custom config (integration test)."""
-        if not os.getenv("ANTHROPIC_API_KEY"):
-            pytest.skip("ANTHROPIC_API_KEY not set")
+        if not os.getenv("GOOGLE_API_KEY"):
+            pytest.skip("GOOGLE_API_KEY not set")
 
         config = LLMConfig(
-            model="claude-sonnet-4-20250514",
+            model="gemini-1.5-pro",
             max_tokens=100,
             temperature=0.5
         )

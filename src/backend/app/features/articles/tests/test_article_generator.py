@@ -104,10 +104,10 @@ async def test_generate_successful(
 
     mock_db.execute = mock_execute
 
-    # Mock Claude API response
+    # Mock Gemini API response
     mock_llm_response = LLMResponse(
         content="# AI開発入門\n\nAI開発について解説します。" + "本文内容。" * 100,
-        model="claude-sonnet-4-5",
+        model="gemini-1.5-pro",
         input_tokens=100,
         output_tokens=500
     )
@@ -162,10 +162,10 @@ async def test_generate_with_validation_errors(
 
     mock_db.execute = mock_execute
 
-    # Mock Claude API response with short content
+    # Mock Gemini API response with short content
     mock_llm_response = LLMResponse(
         content="# タイトル\n\n短い内容",
-        model="claude-sonnet-4-5",
+        model="gemini-1.5-pro",
         input_tokens=50,
         output_tokens=20
     )
@@ -200,7 +200,7 @@ async def test_generate_handles_exception(
         )
     )
 
-    # Mock Claude service to raise exception
+    # Mock Gemini service to raise exception
     with patch.object(
         article_generator.claude_service,
         'generate',

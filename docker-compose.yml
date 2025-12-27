@@ -39,7 +39,7 @@ services:
       REDIS_URL: redis://redis:6379
     env_file:
       - .env.example
-      - .env.local
+      - .env
     volumes:
       - ./src/backend:/app
     depends_on:
@@ -59,7 +59,7 @@ services:
       REDIS_URL: redis://redis:6379
     env_file:
       - .env.example
-      - .env.local
+      - .env
     volumes:
       - ./src/backend:/app
     depends_on:

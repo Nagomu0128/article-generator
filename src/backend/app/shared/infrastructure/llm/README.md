@@ -10,7 +10,7 @@ The LLM infrastructure follows Clean Architecture principles:
 Domain Layer (shared/domain/llm/)
   └── base.py          - Abstract interfaces and data classes
 Infrastructure Layer (shared/infrastructure/llm/)
-  └── claude_service.py - Concrete Claude API implementation
+  └── claude_service.py - Concrete Gemini API implementation
 ```
 
 ## Usage
@@ -20,11 +20,11 @@ Infrastructure Layer (shared/infrastructure/llm/)
 ```python
 from app.shared.infrastructure.llm import get_claude_service
 
-# Get service instance
-claude = get_claude_service()
+# Get service instance (now uses Gemini)
+gemini = get_claude_service()
 
 # Generate text
-response = await claude.generate(
+response = await gemini.generate(
     system_prompt="あなたは優秀なライターです",
     user_prompt="「AI」について100文字で説明してください"
 )
@@ -41,14 +41,14 @@ from app.shared.infrastructure.llm import get_claude_service
 
 # Create custom config
 config = LLMConfig(
-    model="claude-sonnet-4-20250514",
+    model="gemini-1.5-pro",
     max_tokens=4096,
     temperature=0.5
 )
 
 # Use with service
-claude = get_claude_service()
-response = await claude.generate(
+gemini = get_claude_service()
+response = await gemini.generate(
     system_prompt="システムプロンプト",
     user_prompt="ユーザープロンプト",
     config=config
@@ -78,7 +78,7 @@ pytest app/shared/infrastructure/llm/tests/
 Set the following environment variable:
 
 ```env
-ANTHROPIC_API_KEY=sk-ant-api03-xxxxx
+GOOGLE_API_KEY=your-google-api-key-here
 ```
 
 ## Implementation Details
@@ -87,17 +87,16 @@ ANTHROPIC_API_KEY=sk-ant-api03-xxxxx
 
 - **Attempts**: 3 retries
 - **Wait Strategy**: Exponential backoff (2s min, 30s max)
-- **Handled Errors**: All `anthropic.APIError` exceptions
+- **Handled Errors**: All exceptions from Gemini API
 
 ### Response Processing
 
-Text content is extracted from all text blocks in the response:
+Text content is extracted directly from the response:
 
 ```python
-content = "".join(
-    block.text for block in response.content
-    if block.type == "text"
-)
+content = response.text
+input_tokens = response.usage_metadata.prompt_token_count
+output_tokens = response.usage_metadata.candidates_token_count
 ```
 
 ## Extending

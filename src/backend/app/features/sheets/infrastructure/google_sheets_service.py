@@ -57,8 +57,16 @@ class GoogleSheetsService:
                     credentials_dict, scopes=SCOPES
                 )
                 self._client = gspread.authorize(credentials)
+            except json.JSONDecodeError as e:
+                raise ExternalServiceError(
+                    "Google Sheets",
+                    f"GOOGLE_CREDENTIALS_JSONの形式が不正です: {str(e)}"
+                )
             except Exception as e:
-                raise ExternalServiceError("Google Sheets", f"認証失敗: {str(e)}")
+                raise ExternalServiceError(
+                    "Google Sheets",
+                    f"認証失敗: {str(e)}. GOOGLE_CREDENTIALS_JSONを確認してください。"
+                )
         return self._client
 
     @retry(
@@ -84,7 +92,20 @@ class GoogleSheetsService:
 
             return spreadsheet.id, spreadsheet.url
         except Exception as e:
-            raise ExternalServiceError("Google Sheets", f"作成失敗: {str(e)}")
+            error_msg = str(e)
+            # よくあるエラーのメッセージを分かりやすく変換
+            if "storageQuotaExceeded" in error_msg or "storage quota" in error_msg.lower():
+                raise ExternalServiceError(
+                    "Google Sheets",
+                    "サービスアカウントのGoogle Driveストレージが不足しています。GOOGLE_SHEETS_SETUP.mdのトラブルシューティングを参照してください。"
+                )
+            elif "403" in error_msg:
+                raise ExternalServiceError(
+                    "Google Sheets",
+                    "権限エラー: Google Sheets APIとGoogle Drive APIが有効になっているか確認してください。"
+                )
+            else:
+                raise ExternalServiceError("Google Sheets", f"作成失敗: {error_msg}")
 
     @retry(
         stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10)

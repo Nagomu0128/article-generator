@@ -34,7 +34,7 @@ class LLMConfig:
         max_tokens: Maximum number of tokens to generate
         temperature: Sampling temperature (0.0 to 1.0)
     """
-    model: str = "claude-sonnet-4-20250514"
+    model: str = "gemini-1.5-pro"
     max_tokens: int = 8192
     temperature: float = 0.7
 

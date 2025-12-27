@@ -65,6 +65,8 @@ export const articlesApi = {
 
 export const sheetsApi = {
   create: (categoryId: string) => api.post('/sheets/create', { category_id: categoryId }),
+  link: (categoryId: string, sheetId: string, sheetUrl: string) =>
+    api.post('/sheets/link', { category_id: categoryId, sheet_id: sheetId, sheet_url: sheetUrl }),
 };
 
 export const wordpressApi = {

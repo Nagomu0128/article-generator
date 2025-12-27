@@ -13,6 +13,7 @@ export default function DashboardPage() {
       const response = await articlesApi.list({ page: 1, per_page: 1000 });
       return response.data;
     },
+    staleTime: 2 * 60 * 1000, // 記事は2分間キャッシュ
   });
 
   const { data: categoriesData } = useQuery({
@@ -21,6 +22,7 @@ export default function DashboardPage() {
       const response = await categoriesApi.list();
       return response.data;
     },
+    staleTime: 30 * 60 * 1000, // カテゴリは30分間キャッシュ
   });
 
   const stats = (articlesData?.items || []).reduce((acc, article) => {

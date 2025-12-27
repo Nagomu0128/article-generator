@@ -17,6 +17,7 @@ import { articlesApi } from '@/lib/api';
 import { STATUS_LABELS, STATUS_COLORS, ArticleStatus } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, Play } from 'lucide-react';
+import { CreateArticleDialog } from '@/components/create-article-dialog';
 
 export default function ArticlesPage() {
   const [selected, setSelected] = useState<string[]>([]);
@@ -29,6 +30,7 @@ export default function ArticlesPage() {
       const response = await articlesApi.list({ page: 1, per_page: 100 });
       return response.data;
     },
+    staleTime: 2 * 60 * 1000, // 記事は2分間キャッシュ
   });
 
   const generateMutation = useMutation({
@@ -91,6 +93,7 @@ export default function ArticlesPage() {
               選択した{selected.length}件を生成
             </Button>
           )}
+          <CreateArticleDialog />
         </div>
       </div>
 

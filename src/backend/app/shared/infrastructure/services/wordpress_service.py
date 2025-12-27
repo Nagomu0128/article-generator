@@ -1,9 +1,10 @@
-"""WordPress REST API サービス"""
+"""WordPress XMLRPC API サービス"""
 
 import base64
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
+from xmlrpc import client as xmlrpc_client
 
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -35,14 +36,23 @@ class WordPressService:
     """WordPress REST APIクライアント"""
 
     def __init__(self):
-        self.base_url = settings.wordpress_url.rstrip("/")
+        # URLの正規化（プロトコルがない場合はhttps://を追加）
+        url = settings.wordpress_url.rstrip("/")
+        if not url.startswith(("http://", "https://")):
+            url = f"https://{url}"
+        self.base_url = url
+
+        # WordPress.comサイトもセルフホストサイトも標準のWP REST API v2を使用
+        # WordPress.comサイトでもApplication Passwordsは標準のWP REST APIで動作する
         self.api_url = f"{self.base_url}/wp-json/wp/v2"
         self._client: Optional[httpx.AsyncClient] = None
 
     @property
     def auth_header(self) -> str:
         """Basic認証ヘッダーを生成"""
-        credentials = f"{settings.wordpress_username}:{settings.wordpress_app_password}"
+        # アプリケーションパスワードからスペースを削除
+        app_password = settings.wordpress_app_password.replace(" ", "")
+        credentials = f"{settings.wordpress_username}:{app_password}"
         encoded = base64.b64encode(credentials.encode()).decode()
         return f"Basic {encoded}"
 
@@ -65,6 +75,7 @@ class WordPressService:
         """WordPress投稿を作成"""
         client = await self.get_client()
 
+        # 標準のWP REST API v2を使用
         response = await client.post(
             f"{self.api_url}/posts",
             json={"title": title, "content": content, "status": status.value},
@@ -86,6 +97,7 @@ class WordPressService:
         """WordPress投稿を公開"""
         client = await self.get_client()
 
+        # 標準のWP REST API v2を使用
         response = await client.post(
             f"{self.api_url}/posts/{post_id}",
             json={"status": "publish"},

@@ -9,8 +9,11 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 60 * 1000,
+            staleTime: 5 * 60 * 1000, // 5分間はキャッシュを新鮮とみなす
+            gcTime: 10 * 60 * 1000, // 10分間メモリにキャッシュを保持
             refetchOnWindowFocus: false,
+            refetchOnMount: false, // マウント時に自動再取得しない
+            retry: 1, // リトライ回数を減らして高速化
           },
         },
       })

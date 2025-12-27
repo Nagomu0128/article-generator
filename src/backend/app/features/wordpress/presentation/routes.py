@@ -3,9 +3,12 @@
 from datetime import datetime
 
 from fastapi import APIRouter, status
+from sqlalchemy import select
 
 from app.features.articles.infrastructure.repository import ArticleRepository
+from app.features.categories.domain.models import Category
 from app.features.job_logs.domain.models import JobLog
+from app.features.sheets.infrastructure.google_sheets_service import sheets_service
 from app.features.wordpress.domain.schemas import PublishRequest, PublishResponse
 from app.shared.domain.enums import ArticleStatus, JobStatus, JobType
 from app.shared.domain.exceptions import NotFoundError, ValidationError
@@ -63,6 +66,9 @@ async def create_draft(data: PublishRequest, db: DbSession):
     await db.flush()
     await db.refresh(article)
 
+    # Google Sheetsに同期
+    await _sync_to_sheets(db, article)
+
     return PublishResponse(
         article_id=article.id,
         wp_post_id=wp_post.id,
@@ -95,12 +101,11 @@ async def publish_article(data: PublishRequest, db: DbSession):
     article.wp_url = wp_post.link
     article.wp_published_at = datetime.utcnow()
 
-    # TODO: タスク04完了後、Google Sheetsへの同期を追加
-    # if category and category.sheet_id:
-    #     sheets_service.update_article_status(...)
-
     await db.flush()
     await db.refresh(article)
+
+    # Google Sheetsに同期
+    await _sync_to_sheets(db, article)
 
     return PublishResponse(
         article_id=article.id,
@@ -108,3 +113,34 @@ async def publish_article(data: PublishRequest, db: DbSession):
         wp_url=wp_post.link,
         status=wp_post.status,
     )
+
+
+async def _sync_to_sheets(db: DbSession, article) -> None:
+    """Google Sheetsに記事ステータスを同期
+
+    Args:
+        db: データベースセッション
+        article: 同期する記事
+
+    Note:
+        エラーは無視して処理を継続
+    """
+    try:
+        # カテゴリを取得してsheet_idを確認
+        result = await db.execute(
+            select(Category).where(Category.id == article.category_id)
+        )
+        category = result.scalar_one_or_none()
+
+        if category and category.sheet_id:
+            sheets_service.update_article_status(
+                category.sheet_id,
+                article.keyword,
+                article.status,
+                article.title,
+                article.wp_url,
+                article.wp_post_id
+            )
+    except Exception:
+        # Sheetsのエラーは無視して処理を継続
+        pass

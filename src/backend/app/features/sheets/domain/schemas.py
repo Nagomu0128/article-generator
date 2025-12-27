@@ -19,6 +19,14 @@ class CreateSheetResponse(BaseModel):
     sheet_url: str
 
 
+class LinkSheetRequest(BaseModel):
+    """手動作成したスプレッドシートをリンクするリクエスト"""
+
+    category_id: UUID = Field(..., description="カテゴリID")
+    sheet_id: str = Field(..., description="スプレッドシートID")
+    sheet_url: str = Field(..., description="スプレッドシートURL")
+
+
 class UpdateArticleStatusRequest(BaseModel):
     """記事ステータス更新リクエスト"""
 

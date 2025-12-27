@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "記事自動生成システム",
-  description: "Claude API、WordPress、Google Sheetsを統合した自動記事生成・管理システム",
+  description: "Google Gemini API、WordPress、Google Sheetsを統合した自動記事生成・管理システム",
 };
 
 export default function RootLayout({
